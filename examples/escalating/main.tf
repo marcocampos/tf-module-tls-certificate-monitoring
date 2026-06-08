@@ -57,7 +57,7 @@ module "tls" {
   # Only the 5-day threshold pages OpsGenie; the others stay email-only.
   opsgenie_api_key  = each.value.opsgenie ? var.opsgenie_api_key : ""
   opsgenie_region   = "EU"
-  opsgenie_priority = "P1"
+  opsgenie_priority = "P2"
 }
 
 output "monitor_ids" {
