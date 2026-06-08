@@ -78,8 +78,10 @@ module "tls" {
 }
 ```
 
-See [`examples/complete`](./examples/complete) and
-[`examples/email-only`](./examples/email-only).
+See [`examples/complete`](./examples/complete),
+[`examples/email-only`](./examples/email-only), and
+[`examples/escalating`](./examples/escalating) (email at 30/15 days, email +
+OpsGenie at 5 days).
 
 ## Requirements
 
