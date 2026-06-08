@@ -24,14 +24,14 @@ variable "newrelic_api_key" {
   sensitive = true
 }
 
-# Monitor a single domain with email alerting only (no OpsGenie).
+# Monitor a single domain at one threshold with email alerting only (no OpsGenie).
 # Omitting opsgenie_api_key disables the OpsGenie channel entirely.
 module "example_com_tls" {
   source = "../../"
 
-  account_id      = var.newrelic_account_id
-  domain          = "www.example.com"
-  thresholds_days = [30, 7]
+  account_id     = var.newrelic_account_id
+  domain         = "www.example.com"
+  threshold_days = 30
 
   email_recipients = ["sre@example.com"]
 
@@ -41,8 +41,8 @@ module "example_com_tls" {
   }
 }
 
-output "monitor_ids" {
-  value = module.example_com_tls.monitor_ids
+output "monitor_id" {
+  value = module.example_com_tls.monitor_id
 }
 
 output "email_channel_id" {

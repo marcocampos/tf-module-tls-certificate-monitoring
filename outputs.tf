@@ -1,21 +1,21 @@
-output "monitor_ids" {
-  description = "Map of threshold (days, as string) => cert-check monitor GUID."
-  value       = { for k, m in newrelic_synthetics_cert_check_monitor.this : k => m.id }
+output "monitor_id" {
+  description = "GUID of the cert-check monitor."
+  value       = newrelic_synthetics_cert_check_monitor.this.id
 }
 
-output "monitor_internal_ids" {
-  description = "Map of threshold (days, as string) => cert-check monitor internal monitor_id."
-  value       = { for k, m in newrelic_synthetics_cert_check_monitor.this : k => m.monitor_id }
+output "monitor_internal_id" {
+  description = "Internal monitor_id of the cert-check monitor."
+  value       = newrelic_synthetics_cert_check_monitor.this.monitor_id
 }
 
 output "policy_id" {
-  description = "ID of the alert policy holding all threshold conditions."
+  description = "ID of the alert policy."
   value       = newrelic_alert_policy.this.id
 }
 
-output "condition_ids" {
-  description = "Map of threshold (days, as string) => NRQL alert condition ID."
-  value       = { for k, c in newrelic_nrql_alert_condition.this : k => c.id }
+output "condition_id" {
+  description = "ID of the NRQL alert condition."
+  value       = newrelic_nrql_alert_condition.this.id
 }
 
 output "workflow_id" {

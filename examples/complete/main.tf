@@ -30,13 +30,15 @@ variable "opsgenie_api_key" {
   default   = ""
 }
 
-# Monitor a single domain with both email and OpsGenie alerting.
+# Each module instance handles ONE threshold. To alert at 30/15/5 days, use
+# for_each over the thresholds — one monitor + policy + workflow per threshold.
 module "example_com_tls" {
-  source = "../../"
+  source   = "../../"
+  for_each = toset(["30", "15", "5"])
 
-  account_id      = var.newrelic_account_id
-  domain          = "www.example.com"
-  thresholds_days = [30, 15, 5]
+  account_id     = var.newrelic_account_id
+  domain         = "www.example.com"
+  threshold_days = tonumber(each.value)
 
   locations_public = ["US_EAST_1", "EU_WEST_1"]
   check_period     = "EVERY_6_HOURS"
@@ -54,9 +56,9 @@ module "example_com_tls" {
 }
 
 output "monitor_ids" {
-  value = module.example_com_tls.monitor_ids
+  value = { for k, m in module.example_com_tls : k => m.monitor_id }
 }
 
-output "policy_id" {
-  value = module.example_com_tls.policy_id
+output "policy_ids" {
+  value = { for k, m in module.example_com_tls : k => m.policy_id }
 }

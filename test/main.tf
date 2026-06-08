@@ -40,16 +40,16 @@ provider "newrelic" {
 module "tls" {
   source = "../"
 
-  account_id      = var.newrelic_account_id
-  domain          = var.domain
-  thresholds_days = [30, 15, 5]
-  check_period    = "EVERY_5_MINUTES"
+  account_id     = var.newrelic_account_id
+  domain         = var.domain
+  threshold_days = 30
+  check_period   = "EVERY_5_MINUTES"
 
   email_recipients = [var.email]
 }
 
-output "monitor_ids" {
-  value = module.tls.monitor_ids
+output "monitor_id" {
+  value = module.tls.monitor_id
 }
 
 output "policy_id" {

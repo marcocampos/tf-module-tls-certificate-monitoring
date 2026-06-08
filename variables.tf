@@ -19,24 +19,14 @@ variable "name" {
   default     = null
 }
 
-variable "thresholds_days" {
-  description = "Days-before-expiry thresholds. Each value produces its own cert-check monitor and alert condition that fires when the certificate is within that many days of expiry."
-  type        = list(number)
-  default     = [30, 15, 5]
+variable "threshold_days" {
+  description = "Days-before-expiry threshold. Alerts when the certificate is within this many days of expiry. To alert at multiple thresholds (e.g. 30/15/5), instantiate this module once per threshold."
+  type        = number
+  default     = 30
 
   validation {
-    condition     = length(var.thresholds_days) > 0
-    error_message = "thresholds_days must contain at least one value."
-  }
-
-  validation {
-    condition     = alltrue([for t in var.thresholds_days : t > 0 && floor(t) == t])
-    error_message = "Each threshold in thresholds_days must be a positive whole number of days."
-  }
-
-  validation {
-    condition     = length(distinct(var.thresholds_days)) == length(var.thresholds_days)
-    error_message = "thresholds_days must not contain duplicate values."
+    condition     = var.threshold_days > 0 && floor(var.threshold_days) == var.threshold_days
+    error_message = "threshold_days must be a positive whole number of days."
   }
 }
 

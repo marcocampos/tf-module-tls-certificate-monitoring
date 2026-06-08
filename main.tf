@@ -1,20 +1,15 @@
 locals {
-  name   = coalesce(var.name, "tls-cert-${var.domain}")
+  name   = coalesce(var.name, "tls-cert-${var.domain}-${var.threshold_days}d")
   status = var.enabled ? "ENABLED" : "DISABLED"
-
-  # Map each threshold to a stable string key for for_each.
-  thresholds = { for t in var.thresholds_days : tostring(t) => t }
 }
 
-# One cert-check monitor per threshold. Each monitor fails when the certificate
-# on var.domain is within `certificate_expiration` days of expiring.
+# A single cert-check monitor: reports FAILED once the certificate on var.domain
+# is within var.threshold_days of expiring.
 resource "newrelic_synthetics_cert_check_monitor" "this" {
-  for_each = local.thresholds
-
   account_id             = var.account_id
-  name                   = "${local.name} (<= ${each.value}d)"
+  name                   = local.name
   domain                 = var.domain
-  certificate_expiration = tostring(each.value)
+  certificate_expiration = tostring(var.threshold_days)
   period                 = var.check_period
   status                 = local.status
   runtime_type           = var.runtime_type
@@ -40,21 +35,18 @@ resource "newrelic_synthetics_cert_check_monitor" "this" {
   }
 }
 
-# Single alert policy for the domain; every threshold's condition lives here.
 resource "newrelic_alert_policy" "this" {
   account_id          = var.account_id
   name                = "${local.name} TLS expiry"
   incident_preference = "PER_CONDITION"
 }
 
-# One NRQL condition per threshold, counting FAILED cert checks for that monitor.
+# Opens an issue when the monitor reports a FAILED cert check.
 resource "newrelic_nrql_alert_condition" "this" {
-  for_each = local.thresholds
-
   account_id = var.account_id
   policy_id  = newrelic_alert_policy.this.id
   type       = "static"
-  name       = "TLS cert for ${var.domain} expires within ${each.value} days"
+  name       = "TLS cert for ${var.domain} expires within ${var.threshold_days} days"
   enabled    = var.enabled
 
   # Cert checks are sparse (default every 6h), so use event_timer: a window is
@@ -69,7 +61,7 @@ resource "newrelic_nrql_alert_condition" "this" {
   # filter(count(...)) emits 0 on a successful check (not a gap), so the signal
   # returns to 0 and the incident auto-closes once the certificate is renewed.
   nrql {
-    query = "SELECT filter(count(*), WHERE result = 'FAILED') FROM SyntheticCheck WHERE monitorId = '${newrelic_synthetics_cert_check_monitor.this[each.key].monitor_id}'"
+    query = "SELECT filter(count(*), WHERE result = 'FAILED') FROM SyntheticCheck WHERE monitorId = '${newrelic_synthetics_cert_check_monitor.this.monitor_id}'"
   }
 
   critical {
