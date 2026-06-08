@@ -59,7 +59,8 @@ module "tls" {
 ```
 
 At least one notification channel must be configured: set `email_recipients`,
-`opsgenie_api_key`, or both.
+`opsgenie_api_key`, or both. The module enforces this at plan time — supplying
+neither fails with a clear error.
 
 ### Multiple thresholds
 
@@ -96,7 +97,7 @@ See [`examples/complete`](./examples/complete) and
 | `name` | Base name for created resources. | `string` | `tls-cert-<domain>-<threshold_days>d` |
 | `enabled` | Enable monitor and workflow. | `bool` | `true` |
 | `check_period` | Monitor run interval (e.g. `EVERY_6_HOURS`). | `string` | `EVERY_6_HOURS` |
-| `locations_public` | Public synthetics locations. | `list(string)` | `["US_EAST_1"]` |
+| `locations_public` | Public synthetics location(s) the TLS check runs from (one or more). | `list(string)` | `["EU_WEST_1"]` |
 | `locations_private` | Private synthetics location GUIDs. | `list(string)` | `[]` |
 | `runtime_type` | Synthetics runtime type. | `string` | `NODE_API` |
 | `runtime_type_version` | Synthetics runtime version. | `string` | `22.20.0` |
@@ -104,7 +105,7 @@ See [`examples/complete`](./examples/complete) and
 | `email_recipients` | Alert email addresses; enables email when non-empty. | `list(string)` | `[]` |
 | `email_subject` | Email subject template. | `string` | see variables.tf |
 | `opsgenie_api_key` | OpsGenie API key; enables OpsGenie when non-empty. | `string` (sensitive) | `""` |
-| `opsgenie_region` | `US` or `EU`. | `string` | `US` |
+| `opsgenie_region` | `US` or `EU`. | `string` | `EU` |
 | `opsgenie_priority` | OpsGenie priority `P1`–`P5`. | `string` | `P3` |
 | `muting_rules_handling` | Workflow muted-issue handling. | `string` | `NOTIFY_ALL_ISSUES` |
 

@@ -51,9 +51,9 @@ variable "check_period" {
 }
 
 variable "locations_public" {
-  description = "Public New Relic synthetics locations to run the checks from (e.g. [\"US_EAST_1\"]). Leave empty only if locations_private is set."
+  description = "Public New Relic synthetics location(s) the TLS check runs from. Accepts more than one (e.g. [\"EU_WEST_1\", \"US_EAST_1\"]). Leave empty only if locations_private is set."
   type        = list(string)
-  default     = ["US_EAST_1"]
+  default     = ["EU_WEST_1"]
 }
 
 variable "locations_private" {
@@ -106,7 +106,7 @@ variable "opsgenie_api_key" {
 variable "opsgenie_region" {
   description = "OpsGenie account region, used to select the API endpoint. One of \"US\" or \"EU\"."
   type        = string
-  default     = "US"
+  default     = "EU"
 
   validation {
     condition     = contains(["US", "EU"], upper(var.opsgenie_region))

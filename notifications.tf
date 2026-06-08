@@ -23,6 +23,20 @@ locals {
   })
 }
 
+# --- Guard: require at least one notification channel -----------------------
+
+# Fails the plan unless email_recipients and/or opsgenie_api_key is provided.
+# Implemented as a resource precondition (not a variable validation) so the
+# module still passes `terraform validate` with its empty defaults.
+resource "terraform_data" "require_notification_channel" {
+  lifecycle {
+    precondition {
+      condition     = local.enable_email || local.enable_opsgenie
+      error_message = "Configure at least one notification channel: pass a non-empty email_recipients list and/or an opsgenie_api_key."
+    }
+  }
+}
+
 # --- Email destination + channel --------------------------------------------
 
 resource "newrelic_notification_destination" "email" {
@@ -120,13 +134,6 @@ resource "newrelic_workflow" "this" {
     for_each = local.enable_opsgenie ? [newrelic_notification_channel.opsgenie[0].id] : []
     content {
       channel_id = destination.value
-    }
-  }
-
-  lifecycle {
-    precondition {
-      condition     = local.enable_email || local.enable_opsgenie
-      error_message = "At least one notification channel must be configured: set email_recipients and/or opsgenie_api_key."
     }
   }
 }
