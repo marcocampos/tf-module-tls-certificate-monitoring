@@ -30,7 +30,5 @@ output "email_channel_id" {
 
 output "opsgenie_channel_id" {
   description = "ID of the OpsGenie notification channel, or null when OpsGenie is disabled."
-  # enable_opsgenie derives from the sensitive opsgenie_api_key, which taints the
-  # ternary; the channel ID itself is not sensitive, so unwrap it.
-  value = nonsensitive(local.enable_opsgenie ? newrelic_notification_channel.opsgenie[0].id : null)
+  value       = local.enable_opsgenie ? newrelic_notification_channel.opsgenie[0].id : null
 }

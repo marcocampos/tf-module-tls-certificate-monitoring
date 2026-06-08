@@ -1,6 +1,9 @@
 locals {
-  enable_email    = length(var.email_recipients) > 0
-  enable_opsgenie = var.opsgenie_api_key != ""
+  enable_email = length(var.email_recipients) > 0
+  # opsgenie_api_key is sensitive, so the comparison is sensitive too. Unwrap the
+  # presence boolean (not the key) so it can drive count/for_each, which reject
+  # sensitive values.
+  enable_opsgenie = nonsensitive(var.opsgenie_api_key != "")
 
   opsgenie_url = {
     US = "https://api.opsgenie.com/v2/alerts"
