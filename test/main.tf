@@ -23,8 +23,9 @@ variable "newrelic_region" {
   default = "US" # "US" or "EU"
 }
 
-variable "domain" {
-  type = string
+variable "domains" {
+  description = "List of domains (bare hosts) to monitor."
+  type        = list(string)
 }
 
 variable "email" {
@@ -37,29 +38,46 @@ provider "newrelic" {
   region     = var.newrelic_region
 }
 
-module "tls" {
-  source = "../"
+# One module block per threshold; each iterates over the list of domains.
+# For N domains this creates 3 * N cert-check monitors (30/15/5 days each).
+module "tls_30" {
+  source   = "../"
+  for_each = toset(var.domains)
 
-  account_id     = var.newrelic_account_id
-  domain         = var.domain
-  threshold_days = 30
-  check_period   = "EVERY_5_MINUTES"
-
+  account_id       = var.newrelic_account_id
+  domain           = each.value
+  threshold_days   = 30
+  check_period     = "EVERY_30_MINUTES"
   email_recipients = [var.email]
 }
 
-output "monitor_id" {
-  value = module.tls.monitor_id
+module "tls_15" {
+  source   = "../"
+  for_each = toset(var.domains)
+
+  account_id       = var.newrelic_account_id
+  domain           = each.value
+  threshold_days   = 15
+  check_period     = "EVERY_30_MINUTES"
+  email_recipients = [var.email]
 }
 
-output "policy_id" {
-  value = module.tls.policy_id
+module "tls_5" {
+  source   = "../"
+  for_each = toset(var.domains)
+
+  account_id       = var.newrelic_account_id
+  domain           = each.value
+  threshold_days   = 5
+  check_period     = "EVERY_30_MINUTES"
+  email_recipients = [var.email]
 }
 
-output "workflow_id" {
-  value = module.tls.workflow_id
-}
-
-output "email_channel_id" {
-  value = module.tls.email_channel_id
+output "monitor_ids" {
+  description = "Monitor GUIDs grouped by threshold, then by domain."
+  value = {
+    "30d" = { for k, m in module.tls_30 : k => m.monitor_id }
+    "15d" = { for k, m in module.tls_15 : k => m.monitor_id }
+    "5d"  = { for k, m in module.tls_5 : k => m.monitor_id }
+  }
 }
