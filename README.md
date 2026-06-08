@@ -1,4 +1,4 @@
-# terraform-newrelic-tls-certificate-monitoring
+# tf-module-tls-certificate-monitoring
 
 A Terraform module that monitors a single domain's TLS certificate for upcoming
 expiration using a **New Relic Synthetics cert-check monitor**, and alerts at a
